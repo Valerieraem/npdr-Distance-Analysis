@@ -1,0 +1,18 @@
+
+set.seed(1)
+
+#create ID variable
+dats$id <- 1:nrow(dats)
+
+#Use 70% of dataset as training set and remaining 30% as testing set 
+train <- dats %>% dplyr::sample_frac(0.7)
+test  <- dplyr::anti_join(dats, train, by = 'id')
+
+dim(train)
+dim(test)
+# I think this doesn't work so ignore this part for now will continue later!
+input_size = dim(train)*dim(train)
+latent_size = 10
+print(input_size)
+
+
