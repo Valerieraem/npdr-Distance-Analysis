@@ -62,13 +62,32 @@ dim(dats)
 
 ###################################################################
 #Deep Learning Autoencoder
+library(keras)
 
-#library(keras)
+input_size = 30000
+encoding_dim = 1200
 
-#encoder_input <- layer_input()
-#encode <- encoder_input %>% 
-#  layer_dense() %>% 
-#  layer_dense() 
+encoder_input <- layer_input(shape = input_size)
+encoded <- encoder_input %>% 
+  layer_dense(encoding_dim)
+
+econder <- keras_model(encoder_input, encoded)
+summary(encoder)
+
+decoder_input <- layer_input(shape = encoding_dim)
+decoded <- decoder_input %>%
+  layer_dense(input_size)
+
+decoder <- keras_model(decoder_input, decoded)
+summary(decoder)
+
+autoencoder_input <- layer_input(shape = input_size)
+autoencoder <- autoencoder_input %>%
+  encoder() %>%
+  decoder()
+
+autoencoded <- keras_model(autoencoder_input, autoencoder)
+summary(autoencoded)
 
 
 ###################################################################
