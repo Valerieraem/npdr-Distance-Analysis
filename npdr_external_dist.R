@@ -96,12 +96,12 @@ autoencoder <- autoencoder_input %>%
 autoencoded <- keras_model(autoencoder_input, autoencoder)
 summary(autoencoded)
 
-#Placeholder Training Data. Should be created independently
+#Training Data
 class_col <- which(colnames(dataset$train)=="class")
 training_to_matrix <- dataset$train[, -class_col]
 training_set <- as.matrix(training_to_matrix)
 
-#Placeholder Testing Data. Should be created independently
+#Validation/Testing Data
 class_col <- which(colnames(dataset$holdout)=="class")
 testing_to_matrix <- dataset$holdout[, -class_col]
 holdout_set <- as.matrix(testing_to_matrix)
@@ -109,7 +109,7 @@ holdout_set <- as.matrix(testing_to_matrix)
 
 #Training
 autoencoded %>% compile(optimizer='adam', loss='categorical_crossentropy')
-autoencoded %>% fit(training_set, training_set, epochs=50, batch_size =256)
+autoencoded %>% fit(training_set, training_set, validation_data=list(holdout_set, holdout_set), metrics=list(tf.keras.metrics.Accuracy()), epochs=50, batch_size =256)
 
 #Testing
 encoded_holdout <- encoder %>% predict(holdout_set)
@@ -117,16 +117,35 @@ decoded_holdout <- decoder %>% predict(encoded_holdout)
 encoded_holdout <- as.data.frame(encoded_holdout)
 decoded_holdout <- as.data.frame(decoded_holdout)
 
-#TODO
-#Create a Training and Test Dataset
+#Disance Matrix Creation
+class_col <- which(colnames(dats)=="class")
+data_to_matrix <- dats[, -class_col]
+data_whole_set <- as.matrix(data_to_matrix)
+autoencoded_dist_matrix <- encoder %>% predict(data_whole_set)
+autoencoded_dist_matrix <- as.data.frame(autoencoded_dist_matrix)
+#autoencoded_dist_matrix_null_excluded <- na.omit(autoencoded_dist_matrix)
+#autoencoded_dist_matrix[complete.cases(autoencoded_dist_matrix),]
 
-#add validation
+# npdr_aed_results <- npdr::npdr("class", autoencoded_dist_matrix, regression.type="binomial", 
+#                               attr.diff.type="numeric-abs",
+#                               nbd.method="relieff", 
+#                               nbd.metric = "precomputed",
+#                               external.dist=pc.dist,
+#                               #msurf.sd.frac=.5,
+#                               knn=my.k, 
+#                               neighbor.sampling="none", dopar.nn = F,
+#                               padj.method="bonferroni", verbose=T
+# )
+# npdr_aed_results[npdr_aed_results$pval.adj<.05,] # pval.adj, first column
+# npdr_aed_results[1:20,1] # top 20
+
+
+#TODO
+#Fix a Training and Test Dataset Percentages
 
 #check loss function
 
 #Test accuracy of model
-
-#Creating the Distance Matrix
 
 #npdr on new Distance Matrix
 
