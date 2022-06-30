@@ -64,23 +64,30 @@ dim(dats)
 #Deep Learning Autoencoder
 library(keras)
 
-input_size = 30000
-encoding_dim = 1200
+input_size = 100
+layer1_size = 60
+#Smallest dimension (fully compressed)
+encoding_dim = 30
 
+#Encoder
 encoder_input <- layer_input(shape = input_size)
 encoded <- encoder_input %>% 
-  layer_dense(encoding_dim)
+  layer_dense(layer1_size, activation='sigmoid') %>%
+  layer_dense(encoding_dim, activation='relu')
 
-econder <- keras_model(encoder_input, encoded)
+encoder <- keras_model(encoder_input, encoded)
 summary(encoder)
 
+#Decoder
 decoder_input <- layer_input(shape = encoding_dim)
 decoded <- decoder_input %>%
-  layer_dense(input_size)
+  layer_dense(layer1_size, activation='relu') %>%
+  layer_dense(input_size, activation='sigmoid')
 
 decoder <- keras_model(decoder_input, decoded)
 summary(decoder)
 
+#Autoencoder
 autoencoder_input <- layer_input(shape = input_size)
 autoencoder <- autoencoder_input %>%
   encoder() %>%
@@ -88,6 +95,40 @@ autoencoder <- autoencoder_input %>%
 
 autoencoded <- keras_model(autoencoder_input, autoencoder)
 summary(autoencoded)
+
+#Placeholder Training Data. Should be created independently
+class_col <- which(colnames(dataset$train)=="class")
+training_to_matrix <- dataset$train[, -class_col]
+training_set <- as.matrix(training_to_matrix)
+
+#Placeholder Testing Data. Should be created independently
+class_col <- which(colnames(dataset$holdout)=="class")
+testing_to_matrix <- dataset$holdout[, -class_col]
+holdout_set <- as.matrix(testing_to_matrix)
+
+
+#Training
+autoencoded %>% compile(optimizer='adam', loss='categorical_crossentropy')
+autoencoded %>% fit(training_set, training_set, epochs=50, batch_size =256)
+
+#Testing
+encoded_holdout <- encoder %>% predict(holdout_set)
+decoded_holdout <- decoder %>% predict(encoded_holdout)
+encoded_holdout <- as.data.frame(encoded_holdout)
+decoded_holdout <- as.data.frame(decoded_holdout)
+
+#TODO
+#Create a Training and Test Dataset
+
+#add validation
+
+#check loss function
+
+#Test accuracy of model
+
+#Creating the Distance Matrix
+
+#npdr on new Distance Matrix
 
 
 ###################################################################
