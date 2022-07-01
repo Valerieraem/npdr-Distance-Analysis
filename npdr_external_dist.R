@@ -122,22 +122,19 @@ class_col <- which(colnames(dats)=="class")
 data_to_matrix <- dats[, -class_col]
 data_whole_set <- as.matrix(data_to_matrix)
 autoencoded_dist_matrix <- encoder %>% predict(data_whole_set)
-autoencoded_dist_matrix <- as.data.frame(autoencoded_dist_matrix)
-#autoencoded_dist_matrix_null_excluded <- na.omit(autoencoded_dist_matrix)
-#autoencoded_dist_matrix[complete.cases(autoencoded_dist_matrix),]
+auto_dist <- npdr::npdrDistances(autoencoded_dist_matrix, metric="euclidean")
 
-# npdr_aed_results <- npdr::npdr("class", autoencoded_dist_matrix, regression.type="binomial", 
-#                               attr.diff.type="numeric-abs",
-#                               nbd.method="relieff", 
-#                               nbd.metric = "precomputed",
-#                               external.dist=pc.dist,
-#                               #msurf.sd.frac=.5,
-#                               knn=my.k, 
-#                               neighbor.sampling="none", dopar.nn = F,
-#                               padj.method="bonferroni", verbose=T
-# )
-# npdr_aed_results[npdr_aed_results$pval.adj<.05,] # pval.adj, first column
-# npdr_aed_results[1:20,1] # top 20
+npdr_aed_results <- npdr::npdr("class", dats, regression.type="binomial",
+                              attr.diff.type="numeric-abs",
+                              nbd.method="relieff",
+                              nbd.metric = "precomputed",
+                              external.dist=auto_dist,
+                              #msurf.sd.frac=.5,
+                              knn=my.k,
+                              neighbor.sampling="none", dopar.nn = F,
+                              padj.method="bonferroni", verbose=T)
+npdr_aed_results[npdr_aed_results$pval.adj<.05,] # pval.adj, first column
+npdr_aed_results[1:20,1] # top 20
 
 
 #TODO
@@ -146,9 +143,6 @@ autoencoded_dist_matrix <- as.data.frame(autoencoded_dist_matrix)
 #check loss function
 
 #Test accuracy of model
-
-#npdr on new Distance Matrix
-
 
 ###################################################################
 # Random Forrest
