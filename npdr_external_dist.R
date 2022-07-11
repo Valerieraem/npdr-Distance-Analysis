@@ -61,6 +61,23 @@ dim(dats)
 #hist(deg.vec)
 
 ###################################################################
+# npdr
+library(npdr)
+# if you have imbalanced data:
+min.group.size <- min(as.numeric(table(dats[, "class"])))
+my.k <- npdr::knnSURF(2*min.group.size - 1, 0.5)
+npdr_results <- npdr::npdr("class", dats, regression.type="binomial", 
+                           attr.diff.type="numeric-abs",
+                           nbd.method="relieff", 
+                           nbd.metric = "manhattan", 
+                           msurf.sd.frac=.5,
+                           knn=my.k,
+                           neighbor.sampling="none", dopar.nn = F,
+                           padj.method="bonferroni", verbose=T)
+npdr_results[npdr_results$pval.adj<.05,] # pval.adj, first column
+npdr_results[1:20,1] # top 20
+
+###################################################################
 #Deep Learning Autoencoder
 library(keras)
 
@@ -105,7 +122,6 @@ training_set <- as.matrix(training_to_matrix)
 class_col <- which(colnames(dataset$holdout)=="class")
 testing_to_matrix <- dataset$holdout[, -class_col]
 holdout_set <- as.matrix(testing_to_matrix)
-
 
 #Training
 autoencoded %>% compile(optimizer='adam', loss='categorical_crossentropy')
@@ -154,23 +170,6 @@ importance(rf)
 imp<-sort(importance(rf),decreasing=T,index.return=T)
 imp_sorted<-cbind(rownames(importance(rf))[imp$ix],importance(rf)[imp$ix])
 imp_sorted[1:20]
-
-###################################################################
-# npdr
-library(npdr)
-# if you have imbalanced data:
-min.group.size <- min(as.numeric(table(dats[, "class"])))
-my.k <- npdr::knnSURF(2*min.group.size - 1, 0.5)
-npdr_results <- npdr::npdr("class", dats, regression.type="binomial", 
-                     attr.diff.type="numeric-abs",
-                     nbd.method="relieff", 
-                     nbd.metric = "manhattan", 
-                     msurf.sd.frac=.5,
-                     knn=my.k,
-                     neighbor.sampling="none", dopar.nn = F,
-                     padj.method="bonferroni", verbose=T)
-npdr_results[npdr_results$pval.adj<.05,] # pval.adj, first column
-npdr_results[1:20,1] # top 20
 
 ###################################################################
 # Find principal components of observations in variable space
