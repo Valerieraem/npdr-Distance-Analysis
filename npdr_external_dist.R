@@ -123,9 +123,14 @@ class_col <- which(colnames(dataset$holdout)=="class")
 testing_to_matrix <- dataset$holdout[, -class_col]
 holdout_set <- as.matrix(testing_to_matrix)
 
+#Main Data Set
+class_col <- which(colnames(dats)=="class")
+data_to_matrix <- dats[, -class_col]
+data_whole_set <- as.matrix(data_to_matrix)
+
 #Training
 autoencoded %>% compile(optimizer='adam', loss='categorical_crossentropy')
-autoencoded %>% fit(training_set, training_set, validation_data=list(holdout_set, holdout_set), metrics=list(tf.keras.metrics.Accuracy()), epochs=50, batch_size =256)
+autoencoded %>% fit(data_whole_set, data_whole_set, validation_data=list(holdout_set, holdout_set), metrics=list(tf.keras.metrics.Accuracy()), epochs=50, batch_size =256)
 
 #Testing
 encoded_holdout <- encoder %>% predict(holdout_set)
@@ -134,12 +139,13 @@ encoded_holdout <- as.data.frame(encoded_holdout)
 decoded_holdout <- as.data.frame(decoded_holdout)
 
 #Disance Matrix Creation
-class_col <- which(colnames(dats)=="class")
-data_to_matrix <- dats[, -class_col]
-data_whole_set <- as.matrix(data_to_matrix)
-autoencoded_dist_matrix <- encoder %>% predict(data_whole_set)
-auto_dist <- npdr::npdrDistances(autoencoded_dist_matrix, metric="euclidean")
+reduced_dim_DM <- encoder %>% predict(data_whole_set)
+dim(reduced_dim_DM)
+auto_reduced_dat_filtered <- reduced_dim_DM[,!colSums(reduced_dim_DM)==0]
+dim(auto_reduced_dat_filtered)
+auto_dist <- npdr::npdrDistances(auto_reduced_dat_filtered, metric="euclidean")
 
+#npdr on encoded distance matrix
 npdr_aed_results <- npdr::npdr("class", dats, regression.type="binomial",
                               attr.diff.type="numeric-abs",
                               nbd.method="relieff",
@@ -152,13 +158,16 @@ npdr_aed_results <- npdr::npdr("class", dats, regression.type="binomial",
 npdr_aed_results[npdr_aed_results$pval.adj<.05,] # pval.adj, first column
 npdr_aed_results[1:20,1] # top 20
 
-
 #TODO
-#Fix a Training and Test Dataset Percentages
-
 #check loss function
 
 #Test accuracy of model
+
+#Create Custom Layers for PCA principles
+
+#Refine Layers
+
+#Make Class Identification
 
 ###################################################################
 # Random Forrest
@@ -216,3 +225,26 @@ npdr_rf_results <- npdr::npdr("class", dats, regression.type="binomial",
 )
 npdr_rf_results[npdr_rf_results$pval.adj<.05,] # pval.adj, first column
 npdr_rf_results[1:20,1] # top 20
+
+###################################################################
+#Evaluation Metrics
+
+# compare top 20 TPR for all signals 
+npdr::detectionStats(dataset$signal.names,npdr_results[1:20,1])$TPR
+npdr::detectionStats(dataset$signal.names,imp_sorted[1:20])$TPR
+npdr::detectionStats(dataset$signal.names,npdr_aed_results[1:20,1])$TPR
+npdr::detectionStats(dataset$signal.names,npdr_pc_results[1:20,1])$TPR
+
+# compare top 20 TPR for main effects 
+npdr::detectionStats(colnames(dats)[dataset$main.vars],npdr_results[1:20,1])$TPR
+npdr::detectionStats(colnames(dats)[dataset$main.vars],imp_sorted[1:20])$TPR
+npdr::detectionStats(colnames(dats)[dataset$main.vars],npdr_aed_results[1:20,1])$TPR
+npdr::detectionStats(colnames(dats)[dataset$main.vars],npdr_pc_results[1:20,1])$TPR
+
+# compare top 20 TPR for interaction effects 
+npdr::detectionStats(colnames(dats)[dataset$int.vars],npdr_results[1:20,1])$TPR
+npdr::detectionStats(colnames(dats)[dataset$int.vars],imp_sorted[1:20])$TPR
+npdr::detectionStats(colnames(dats)[dataset$int.vars],npdr_aed_results[1:20,1])$TPR
+npdr::detectionStats(colnames(dats)[dataset$int.vars],npdr_pc_results[1:20,1])$TPR
+
+
