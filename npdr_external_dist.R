@@ -23,7 +23,7 @@
 # Leiden clustering?
 # Transpose the clustering to see if interacting variables cluster together. 
 
-###################################################################
+## ---- Simulate Data-----------------------------------------------------
 # simulate data
 library(npdro)
 num.samples <- 300
@@ -60,7 +60,7 @@ dim(dats)
 #deg.vec <- degree(A.graph)
 #hist(deg.vec)
 
-###################################################################
+## ---- npdr--------------------------------------------------------
 # npdr
 library(npdr)
 # if you have imbalanced data:
@@ -77,19 +77,21 @@ npdr_results <- npdr::npdr("class", dats, regression.type="binomial",
 npdr_results[npdr_results$pval.adj<.05,] # pval.adj, first column
 npdr_results[1:20,1] # top 20
 
-###################################################################
+## ---- Autoencoder-------------------------------------------------
 #Deep Learning Autoencoder
 library(keras)
 
 input_size = 100
-layer1_size = 60
+layer1_size = 75
+layer2_size = 50
 #Smallest dimension (fully compressed)
-encoding_dim = 30
+encoding_dim = 35
 
 #Encoder
 encoder_input <- layer_input(shape = input_size)
 encoded <- encoder_input %>% 
-  layer_dense(layer1_size, activation='sigmoid') %>%
+  layer_dense(layer1_size, activation='relu') %>%
+  layer_dense(layer2_size, activation = 'relu') %>%
   layer_dense(encoding_dim, activation='relu')
 
 encoder <- keras_model(encoder_input, encoded)
@@ -98,8 +100,9 @@ summary(encoder)
 #Decoder
 decoder_input <- layer_input(shape = encoding_dim)
 decoded <- decoder_input %>%
+  layer_dense(layer2_size, activation='relu') %>%
   layer_dense(layer1_size, activation='relu') %>%
-  layer_dense(input_size, activation='sigmoid')
+  layer_dense(input_size, activation='relu')
 
 decoder <- keras_model(decoder_input, decoded)
 summary(decoder)
@@ -129,8 +132,9 @@ data_to_matrix <- dats[, -class_col]
 data_whole_set <- as.matrix(data_to_matrix)
 
 #Training
-autoencoded %>% compile(optimizer='adam', loss='categorical_crossentropy')
-autoencoded %>% fit(data_whole_set, data_whole_set, validation_data=list(holdout_set, holdout_set), metrics=list(tf.keras.metrics.Accuracy()), epochs=50, batch_size =256)
+autoencoded %>% compile(optimizer='adam', loss='categorical_crossentropy', metrics = c('accuracy'))
+autoencoded %>% fit(data_whole_set, data_whole_set, validation_data=list(holdout_set, holdout_set), callbacks = list(
+  callback_early_stopping(monitor='accuracy', patience=5)), metrics=list(tf.keras.metrics.Accuracy()), epochs=75, batch_size =256)
 
 #Testing
 encoded_holdout <- encoder %>% predict(holdout_set)
@@ -169,7 +173,7 @@ npdr_aed_results[1:20,1] # top 20
 
 #Make Class Identification
 
-###################################################################
+## ---- Random Forrest--------------------------------------------
 # Random Forrest
 library(randomForest)
 rf<-randomForest(as.factor(dats$class) ~ .,data=dats, ntree=5000) 
@@ -180,7 +184,7 @@ imp<-sort(importance(rf),decreasing=T,index.return=T)
 imp_sorted<-cbind(rownames(importance(rf))[imp$ix],importance(rf)[imp$ix])
 imp_sorted[1:20]
 
-###################################################################
+## ---- Principal Components---------------------------------------
 # Find principal components of observations in variable space
 # Choose the number of PCs to use
 class_col <- which(colnames(dats)=="class")
@@ -204,6 +208,8 @@ npdr_pc_results <- npdr::npdr("class", dats, regression.type="binomial",
 npdr_pc_results[npdr_pc_results$pval.adj<.05,] # pval.adj, first column
 npdr_pc_results[1:20,1] # top 20
 
+
+## ---- Random Forrest Dist for NPDR--------------------------------
 library(randomForest)
 rf<-randomForest(y=as.factor(dats$class), x=predictors,
                   ntree=5000,
@@ -226,25 +232,24 @@ npdr_rf_results <- npdr::npdr("class", dats, regression.type="binomial",
 npdr_rf_results[npdr_rf_results$pval.adj<.05,] # pval.adj, first column
 npdr_rf_results[1:20,1] # top 20
 
-###################################################################
+## ---- Evaluation Metrics-------------------------------------------
 #Evaluation Metrics
-
-# compare top 20 TPR for all signals 
-npdr::detectionStats(dataset$signal.names,npdr_results[1:20,1])$TPR
-npdr::detectionStats(dataset$signal.names,imp_sorted[1:20])$TPR
-npdr::detectionStats(dataset$signal.names,npdr_aed_results[1:20,1])$TPR
-npdr::detectionStats(dataset$signal.names,npdr_pc_results[1:20,1])$TPR
-
-# compare top 20 TPR for main effects 
-npdr::detectionStats(colnames(dats)[dataset$main.vars],npdr_results[1:20,1])$TPR
-npdr::detectionStats(colnames(dats)[dataset$main.vars],imp_sorted[1:20])$TPR
-npdr::detectionStats(colnames(dats)[dataset$main.vars],npdr_aed_results[1:20,1])$TPR
-npdr::detectionStats(colnames(dats)[dataset$main.vars],npdr_pc_results[1:20,1])$TPR
-
-# compare top 20 TPR for interaction effects 
-npdr::detectionStats(colnames(dats)[dataset$int.vars],npdr_results[1:20,1])$TPR
-npdr::detectionStats(colnames(dats)[dataset$int.vars],imp_sorted[1:20])$TPR
-npdr::detectionStats(colnames(dats)[dataset$int.vars],npdr_aed_results[1:20,1])$TPR
-npdr::detectionStats(colnames(dats)[dataset$int.vars],npdr_pc_results[1:20,1])$TPR
+Results <- data.frame(
+  Method = c("npdr", "Random Forrest", "Autoencoder", "Principle Components"),
+  All_Signals = c(npdr::detectionStats(dataset$signal.names,npdr_results[1:20,1])$TPR,
+                  npdr::detectionStats(dataset$signal.names,imp_sorted[1:20])$TPR,
+                  npdr::detectionStats(dataset$signal.names,npdr_aed_results[1:20,1])$TPR,
+                  npdr::detectionStats(dataset$signal.names,npdr_pc_results[1:20,1])$TPR),
+  
+  Main_Effects = c(npdr::detectionStats(colnames(dats)[dataset$main.vars],npdr_results[1:20,1])$TPR,
+                   npdr::detectionStats(colnames(dats)[dataset$main.vars],imp_sorted[1:20])$TPR,
+                   npdr::detectionStats(colnames(dats)[dataset$main.vars],npdr_aed_results[1:20,1])$TPR,
+                   npdr::detectionStats(colnames(dats)[dataset$main.vars],npdr_pc_results[1:20,1])$TPR),
+  
+  Interaction_Effects = c(npdr::detectionStats(colnames(dats)[dataset$int.vars],npdr_results[1:20,1])$TPR,
+                          npdr::detectionStats(colnames(dats)[dataset$int.vars],imp_sorted[1:20])$TPR,
+                          npdr::detectionStats(colnames(dats)[dataset$int.vars],npdr_aed_results[1:20,1])$TPR,
+                          npdr::detectionStats(colnames(dats)[dataset$int.vars],npdr_pc_results[1:20,1])$TPR)
+)
 
 
