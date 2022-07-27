@@ -21,7 +21,10 @@
 # choice of knn controls number of clusters
 # multisurf adaptive radius, results in undirected (Louvain clustering)
 # Leiden clustering?
-# Transpose the clustering to see if interacting variables cluster together. 
+# Transpose the clustering to see if interacting variables cluster together.
+
+#initialization for first runs.
+pct.mixed <- 0.5
 
 ## ---- Simulate Data-----------------------------------------------------
 # simulate data
@@ -39,7 +42,7 @@ dataset <- npdro::createSimulation2(num.samples=num.samples,
                                     mix.type="main-interactionScalefree",
                                     label="class",
                                     sim.type="mixed",
-                                    pct.mixed=0.5,
+                                    pct.mixed=pct.mixed,
                                     pct.train=0.5,
                                     pct.holdout=0.5,
                                     pct.validation=0,
@@ -82,16 +85,18 @@ npdr_results[1:20,1] # top 20
 library(keras)
 
 input_size = 100
-layer1_size = 75
-layer2_size = 50
+layer1_size = 80
+layer2_size = 60
+layer3_size = 40
 #Smallest dimension (fully compressed)
-encoding_dim = 35
+encoding_dim = 30
 
 #Encoder
 encoder_input <- layer_input(shape = input_size)
 encoded <- encoder_input %>% 
   layer_dense(layer1_size, activation='relu') %>%
   layer_dense(layer2_size, activation = 'relu') %>%
+  layer_dense(layer3_size, activation = 'relu') %>%
   layer_dense(encoding_dim, activation='relu')
 
 encoder <- keras_model(encoder_input, encoded)
@@ -100,6 +105,7 @@ summary(encoder)
 #Decoder
 decoder_input <- layer_input(shape = encoding_dim)
 decoded <- decoder_input %>%
+  layer_dense(layer3_size, activation = 'relu') %>%
   layer_dense(layer2_size, activation='relu') %>%
   layer_dense(layer1_size, activation='relu') %>%
   layer_dense(input_size, activation='relu')
@@ -132,9 +138,11 @@ data_to_matrix <- dats[, -class_col]
 data_whole_set <- as.matrix(data_to_matrix)
 
 #Training
-autoencoded %>% compile(optimizer='adam', loss='categorical_crossentropy', metrics = c('accuracy'))
-autoencoded %>% fit(data_whole_set, data_whole_set, validation_data=list(holdout_set, holdout_set), callbacks = list(
+autoencoded %>% compile(optimizer='adam', loss='categorical_crossentropy', metrics = c('accuracy', 'mse'))
+traindat <- autoencoded %>% fit(data_whole_set, data_whole_set, validation_data=list(holdout_set, holdout_set), callbacks = list(
   callback_early_stopping(monitor='accuracy', patience=5)), metrics=list(tf.keras.metrics.Accuracy()), epochs=75, batch_size =256)
+
+plot(traindat)
 
 #Testing
 encoded_holdout <- encoder %>% predict(holdout_set)
@@ -161,17 +169,6 @@ npdr_aed_results <- npdr::npdr("class", dats, regression.type="binomial",
                               padj.method="bonferroni", verbose=T)
 npdr_aed_results[npdr_aed_results$pval.adj<.05,] # pval.adj, first column
 npdr_aed_results[1:20,1] # top 20
-
-#TODO
-#check loss function
-
-#Test accuracy of model
-
-#Create Custom Layers for PCA principles
-
-#Refine Layers
-
-#Make Class Identification
 
 ## ---- Random Forrest--------------------------------------------
 # Random Forrest
@@ -252,4 +249,18 @@ Results <- data.frame(
                           npdr::detectionStats(colnames(dats)[dataset$int.vars],npdr_pc_results[1:20,1])$TPR)
 )
 
+## ---- Data 1 -----------------------------------------------------------
+## Data 1-4 used for generating reports
+pct.mixed <- 0.1
 
+## ---- Data 2 -----------------------------------------------------------
+pct.mixed <- 0.25
+
+## ---- Data 3 -----------------------------------------------------------
+pct.mixed <- 0.5
+
+## ---- Data 4 -----------------------------------------------------------
+pct.mixed <- 0.75
+
+## ---- Data 5 -----------------------------------------------------------
+pct.mixed <- 0.9

@@ -1,0 +1,207 @@
+---
+title: "Distance Analysis Report"
+output: html_document
+date: "2022-07-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, include=FALSE, cache=FALSE}
+knitr::read_chunk('npdr_external_dist.R')
+```
+
+# 10% Main Variable
+```{r, Data 1,include=FALSE}
+```
+
+## Data Generation
+```{r, Simulate Data,echo=FALSE}
+```
+
+## npdr
+```{r, npdr,echo=FALSE}
+```
+
+## Autoencoder
+```{r, Autoencoder,echo=FALSE}
+```
+
+## Random Forrest
+```{r, Random Forrest,echo=FALSE}
+```
+
+## Principal Components
+```{r, Principal Components,echo=FALSE}
+```
+
+## Evaluation Metrics
+```{r, Evaluation Metrics,echo=FALSE}
+```
+
+``` {r}
+Eval1 <- Results
+```
+
+
+
+
+
+# 25% Main Variable
+```{r, Data 2,include=FALSE}
+```
+
+## Data Generation
+```{r, Simulate Data,echo=FALSE}
+```
+
+## npdr
+```{r, npdr,echo=FALSE}
+```
+
+## Autoencoder
+```{r, Autoencoder,echo=FALSE}
+```
+
+## Random Forrest
+```{r, Random Forrest,echo=FALSE}
+```
+
+## Principal Components
+```{r, Principal Components,echo=FALSE}
+```
+
+## Evaluation Metrics
+```{r, Evaluation Metrics,echo=FALSE}
+```
+
+``` {r}
+Eval2 <- Results
+```
+
+
+# 50% Main Variable
+```{r, Data 3,include=FALSE}
+```
+
+## Data Generation
+```{r, Simulate Data,echo=FALSE}
+```
+
+## npdr
+```{r, npdr,echo=FALSE}
+```
+
+## Autoencoder
+```{r, Autoencoder,echo=FALSE}
+```
+
+## Random Forrest
+```{r, Random Forrest,echo=FALSE}
+```
+
+## Principal Components
+```{r, Principal Components,echo=FALSE}
+```
+
+## Evaluation Metrics
+```{r, Evaluation Metrics,echo=FALSE}
+```
+
+``` {r}
+Eval3 <- Results
+```
+
+
+
+
+
+# 75% Main Variable
+```{r, Data 4,include=FALSE}
+```
+
+## Data Generation
+```{r, Simulate Data,echo=FALSE}
+```
+
+## npdr
+```{r, npdr,echo=FALSE}
+```
+
+## Autoencoder
+```{r, Autoencoder,echo=FALSE}
+```
+
+## Random Forrest
+```{r, Random Forrest,echo=FALSE}
+```
+
+## Principal Components
+```{r, Principal Components,echo=FALSE}
+```
+
+## Evaluation Metrics
+```{r, Evaluation Metrics,echo=FALSE}
+```
+
+``` {r}
+Eval4 <- Results
+```
+
+
+# 90% Main Variable
+```{r, Data 5,include=FALSE}
+```
+
+## Data Generation
+```{r, Simulate Data,echo=FALSE}
+```
+
+## npdr
+```{r, npdr,echo=FALSE}
+```
+
+## Autoencoder
+```{r, Autoencoder,echo=FALSE}
+```
+
+## Random Forrest
+```{r, Random Forrest,echo=FALSE}
+```
+
+## Principal Components
+```{r, Principal Components,echo=FALSE}
+```
+
+## Evaluation Metrics
+```{r, Evaluation Metrics,echo=FALSE}
+```
+
+``` {r}
+Eval5 <- Results
+```
+
+
+# Results
+## 10%
+``` {r, echo=FALSE}
+print(Eval1)
+```
+## 25%
+``` {r, echo=FALSE}
+print(Eval2)
+```
+## 50%
+``` {r, echo=FALSE}
+print(Eval3)
+```
+## 75%
+``` {r, echo=FALSE}
+print(Eval4)
+```
+## 90%
+``` {r, echo=FALSE}
+print(Eval5)
+```
