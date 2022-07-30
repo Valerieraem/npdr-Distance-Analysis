@@ -5,7 +5,7 @@ date: "2022-07-27"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, error = TRUE)
 ```
 
 
@@ -26,7 +26,10 @@ knitr::read_chunk('npdr_external_dist.R')
 ```
 
 ## Autoencoder
-```{r, Autoencoder,echo=FALSE}
+```{r, Autoencoder,include=TRUE}
+```
+```{r, echo=FALSE}
+plot(traindat) 
 ```
 
 ## Random Forrest
@@ -37,6 +40,13 @@ knitr::read_chunk('npdr_external_dist.R')
 ```{r, Principal Components,echo=FALSE}
 ```
 
+## Denoising
+```{r, Denoising, include=TRUE}
+```
+```{r, echo=FALSE}
+plot(traindat) 
+```
+
 ## Evaluation Metrics
 ```{r, Evaluation Metrics,echo=FALSE}
 ```
@@ -44,10 +54,6 @@ knitr::read_chunk('npdr_external_dist.R')
 ``` {r}
 Eval1 <- Results
 ```
-
-
-
-
 
 # 25% Main Variable
 ```{r, Data 2,include=FALSE}
@@ -64,6 +70,9 @@ Eval1 <- Results
 ## Autoencoder
 ```{r, Autoencoder,echo=FALSE}
 ```
+```{r, echo=FALSE}
+plot(traindat) 
+```
 
 ## Random Forrest
 ```{r, Random Forrest,echo=FALSE}
@@ -71,6 +80,13 @@ Eval1 <- Results
 
 ## Principal Components
 ```{r, Principal Components,echo=FALSE}
+```
+
+## Denoising
+```{r, Denoising, echo=FALSE}
+```
+```{r, echo=FALSE}
+plot(traindat) 
 ```
 
 ## Evaluation Metrics
@@ -97,6 +113,9 @@ Eval2 <- Results
 ## Autoencoder
 ```{r, Autoencoder,echo=FALSE}
 ```
+```{r, echo=FALSE}
+plot(traindat) 
+```
 
 ## Random Forrest
 ```{r, Random Forrest,echo=FALSE}
@@ -104,6 +123,13 @@ Eval2 <- Results
 
 ## Principal Components
 ```{r, Principal Components,echo=FALSE}
+```
+
+## Denoising
+```{r, Denoising, echo=FALSE}
+```
+```{r, echo=FALSE}
+plot(traindat) 
 ```
 
 ## Evaluation Metrics
@@ -129,9 +155,11 @@ Eval3 <- Results
 ## npdr
 ```{r, npdr,echo=FALSE}
 ```
-
 ## Autoencoder
 ```{r, Autoencoder,echo=FALSE}
+```
+```{r, echo=FALSE}
+plot(traindat) 
 ```
 
 ## Random Forrest
@@ -140,6 +168,13 @@ Eval3 <- Results
 
 ## Principal Components
 ```{r, Principal Components,echo=FALSE}
+```
+
+## Denoising
+```{r, Denoising, echo=FALSE}
+```
+```{r, echo=FALSE}
+plot(traindat) 
 ```
 
 ## Evaluation Metrics
@@ -166,6 +201,9 @@ Eval4 <- Results
 ## Autoencoder
 ```{r, Autoencoder,echo=FALSE}
 ```
+```{r, echo=FALSE}
+plot(traindat) 
+```
 
 ## Random Forrest
 ```{r, Random Forrest,echo=FALSE}
@@ -173,6 +211,13 @@ Eval4 <- Results
 
 ## Principal Components
 ```{r, Principal Components,echo=FALSE}
+```
+
+## Denoising
+```{r, Denoising, echo=FALSE}
+```
+```{r, echo=FALSE}
+plot(traindat) 
 ```
 
 ## Evaluation Metrics
